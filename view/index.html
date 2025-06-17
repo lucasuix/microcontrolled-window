@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Horizontal Drag</title>
+  <style>
+    #container {
+      width: 800px;
+      height: 600px;
+      background: #eee;
+      position: relative;
+      margin: 50px auto;
+      border: 2px solid #ccc;
+    }
+
+    #slider {
+      width: 400px;
+      height: 600px;
+      background: steelblue;
+      position: absolute;
+      /*top: 25px;*/
+      left: 0;
+      cursor: grab;
+      border-radius: 5px;
+    }
+
+    #slider.dragging {
+      cursor: grabbing;
+    }
+
+    #output {
+      text-align: center;
+      font-family: sans-serif;
+      margin-top: 20px;
+    }
+  </style>
+  <script src="eel.js"></script>
+</head>
+<body>
+
+<div id="container">
+  <div id="slider"></div>
+</div>
+<div id="output">Position: 0%</div>
+
+<script>
+  const container = document.getElementById('container');
+  const slider = document.getElementById('slider');
+  const output = document.getElementById('output');
+
+  let isDragging = false;
+  const containerRect = container.getBoundingClientRect();
+  const sliderRect = slider.getBoundingClientRect();
+
+  let sliderLastDrag = 0;
+  let sliderLeftPos = 0;
+  let mouseEntryX = 0;
+  let newX = 0;
+  const maxX = container.offsetWidth - slider.offsetWidth;
+
+  slider.addEventListener('mousedown', (e) => {
+    sliderLeftPos = Math.max(0, (e.clientX - containerRect.left) - (e.clientX - sliderLastDrag));
+    mouseEntryX = (e.clientX - containerRect.left);
+    isDragging = true;
+    slider.classList.add('dragging');
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    sliderLastDrag = newX;
+    slider.classList.remove('dragging');
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+
+
+    const mouseX = e.clientX - containerRect.left;
+    const deltaX = (mouseX - mouseEntryX);
+    newX = Math.max(0, Math.min(sliderLastDrag + deltaX, maxX));
+    slider.style.left = `${newX}px`;
+
+    const percent = Math.round((newX / maxX) * 100);
+    output.textContent = `Position: ${percent}%`;
+
+    eel.sendPosition(percent)(); //Enviando para o backend
+  });
+</script>
+
+</body>
+</html>

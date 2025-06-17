@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Horizontal Drag - Mobile Friendly</title>
+  <style>
+    #container {
+      width: 600px;
+      height: 100px;
+      background: #eee;
+      position: relative;
+      margin: 50px auto;
+      border: 2px solid #ccc;
+      touch-action: none; /* Prevent touch scrolling while dragging */
+    }
+
+    #slider {
+      width: 50px;
+      height: 50px;
+      background: steelblue;
+      position: absolute;
+      top: 25px;
+      left: 0;
+      cursor: grab;
+      border-radius: 5px;
+      touch-action: none; /* Prevents iOS Safari from interfering */
+    }
+
+    #slider.dragging {
+      cursor: grabbing;
+    }
+
+    #output {
+      text-align: center;
+      font-family: sans-serif;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="container">
+  <div id="slider"></div>
+</div>
+<div id="output">Position: 0%</div>
+
+<script>
+  const container = document.getElementById('container');
+  const slider = document.getElementById('slider');
+  const output = document.getElementById('output');
+
+  let isDragging = false;
+  let containerRect;
+  let maxX;
+
+  function updatePosition(clientX) {
+    const mouseX = clientX - containerRect.left;
+    let newX = Math.max(0, Math.min(mouseX - slider.offsetWidth / 2, maxX));
+    slider.style.left = `${newX}px`;
+
+    const percent = Math.round((newX / maxX) * 100);
+    output.textContent = `Position: ${percent}%`;
+  }
+
+  // Mouse events
+  slider.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    containerRect = container.getBoundingClientRect();
+    maxX = container.offsetWidth - slider.offsetWidth;
+    isDragging = true;
+    slider.classList.add('dragging');
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    slider.classList.remove('dragging');
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    updatePosition(e.clientX);
+  });
+
+  // Touch events
+  slider.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    containerRect = container.getBoundingClientRect();
+    maxX = container.offsetWidth - slider.offsetWidth;
+    isDragging = true;
+    slider.classList.add('dragging');
+  });
+
+  document.addEventListener('touchend', () => {
+    isDragging = false;
+    slider.classList.remove('dragging');
+  });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    updatePosition(touch.clientX);
+  });
+</script>
+
+</body>
+</html>
